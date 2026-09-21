@@ -40,3 +40,10 @@ class Verdict:
     rationale: str
 
 
+@dataclass(frozen=True)
+class ResultSummary:
+    name: str
+    auc: float
+    recall_at_precision_90: float
+    latency_ms: float
+    usd_per_case: float

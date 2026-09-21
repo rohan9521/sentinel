@@ -1,18 +1,17 @@
-# README.md
 # Sentinel
 
-Sentinel is a monorepo for an explainable fraud-triage system that compares a single tool-calling agent against simpler baselines. The repository is intentionally structured for reproducible evaluation, offline demo use, and strict engineering operational standards.
+Sentinel is a monorepo for an explainable fraud-triage system that compares a single tool-calling agent against simpler baselines. The project intentionally supports offline demo execution, transparent synthetic evaluation, and a reusable backend/frontend structure for future model and evaluation work.
 
-## Project status
+## Current status
 
-This repository is in its initial scaffold phase. The setup includes monorepo structure, typed Python and TypeScript configuration, pre-commit hooks, a FakeLLM, domain models, and a synthetic data generator with a time-based split test. These pieces are not a complete fraud model yet, but they give the project a stable foundation for the later phases described in the issue.
+The repository now contains the initial full-stack foundation for the project described in the issue: a typed backend, synthetic data generation with a time-based split test, a fake offline LLM, a FastAPI app, and a React front-end that runs in offline demo mode without external API keys.
 
-## Monorepo layout
+## Repository layout
 
-- `backend/`: Python application with a `src/` layout.
-- `frontend/`: React + TypeScript + Vite app.
-- `docs/`: architecture and decision notes.
-- `results/`: generated metrics and demo artifacts.
+- `backend/` – Python API and domain logic with a `src/` layout.
+- `frontend/` – React + TypeScript + Vite UI.
+- `docs/` – architecture and decision records.
+- `results/` – generated evaluation artifacts.
 
 ## Quickstart
 
@@ -22,40 +21,43 @@ Prerequisites:
 - Node.js 20+
 - `uv`
 
-Install dependencies and run the verification gates:
+Set up the repo:
 
 ```bash
 make setup
-make check
 ```
 
-Run the local demo services:
+Run the offline demo app:
 
 ```bash
 make dev
 ```
 
-Use the offline demo mode by default via the `fake` LLM provider. A real provider can be enabled using the values in `.env.example`.
+This starts the backend API and frontend app in demo mode using the fake provider by default. The configuration can be adjusted through `.env.example`.
 
 ## Architecture
 
 ```mermaid
 flowchart LR
     A[Frontend React app] --> B[FastAPI backend]
-    B --> C[Domain + config]
-    C --> D[Synthetic data]
-    C --> E[FakeLLM]
-    D --> F[Evaluation harness]
+    B --> C[Domain models]
+    C --> D[Synthetic data generator]
+    D --> E[Evaluation and results]
+    B --> F[FakeLLM]
     F --> G[results/]
 ```
 
-## Documentation
+## Data and evaluation model
 
-- `docs/architecture.md` includes the system design notes.
-- `docs/decisions.md` records the chosen technical decisions for the initial setup.
-- `docs/sources.md` will hold public references as the project advances.
+The project uses synthetic transactions and a time-ordered split so the workflow remains reproducible and free of leakage across train/validation/test windows. The evaluation harness is designed around the issue requirements and emits results to the `results/` folder.
+
+## Project standards
+
+- Python config is strongly typed via `pydantic-settings`.
+- UI state is managed in React and the app works in offline demo mode.
+- The backend exposes health, case-list, case-detail, and comparison endpoints.
+- Tests accompany the core synthetic-data and fake-LLM logic.
 
 ## Contributing
 
-The project follows a layered design with strict boundaries between domain logic, data generation, and future agent/evaluation components. Keep tests close to the relevant code and prefer small, focused modules.
-
+The project is intentionally structured to allow the phases described in the issue to be completed incrementally: synthetic data first, then evaluation, then a richer agent/tooling layer, and finally deeper frontend pages and reporting.

@@ -8,4 +8,3 @@ describe('App', () => {
     expect(screen.getByRole('heading', { name: /sentinel/i })).toBeInTheDocument();
   });
 });
-

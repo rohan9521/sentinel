@@ -26,7 +26,7 @@ class SyntheticCaseGenerator:
     def generate_cases(self, count: int = 100) -> list[Case]:
         rng = Random(self.seed)
         cases: list[Case] = []
-        start = datetime(2024, 1, 1, tzinfo=None)
+        start = datetime(2024, 1, 1)
 
         for index in range(count):
             amount = round(40 + (rng.random() * 1700), 2)
@@ -54,7 +54,13 @@ class SyntheticCaseGenerator:
             )
         return cases
 
-    def split_cases_time_based(self, cases: list[Case], *, train_ratio: float = 0.6, val_ratio: float = 0.2) -> tuple[list[Case], list[Case], list[Case]]:
+    def split_cases_time_based(
+        self,
+        cases: list[Case],
+        *,
+        train_ratio: float = 0.6,
+        val_ratio: float = 0.2,
+    ) -> tuple[list[Case], list[Case], list[Case]]:
         if not 0.0 < train_ratio < 1.0 or not 0.0 < val_ratio < 1.0:
             raise ValueError("ratios must be between 0 and 1")
 
@@ -71,3 +77,7 @@ class SyntheticCaseGenerator:
 
         return train, val, test
 
+
+def build_demo_dataset() -> list[Case]:
+    generator = SyntheticCaseGenerator(seed=7)
+    return generator.generate_cases(8)

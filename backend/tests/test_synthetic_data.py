@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import pytest
-
 from sentinel.data.synthetic import SyntheticCaseGenerator
 
 
@@ -31,4 +29,3 @@ def test_synthetic_data_is_seeded_and_reproducible() -> None:
 
     assert [case.case_id for case in cases_a] == [case.case_id for case in cases_b]
     assert [case.transaction.amount for case in cases_a] == [case.transaction.amount for case in cases_b]
-

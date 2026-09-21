@@ -1,17 +1,13 @@
-# docs/architecture.md
 # Architecture
 
-This repository uses a monotonic, layered structure intended to preserve separation between pure domain logic and infrastructure concerns.
+This repository follows the layered pattern described in the issue: domain logic stays pure, data generation remains separate, the API is thin, and the front-end consumes the backend through typed interfaces.
 
 ## Layering intent
 
-- `backend/src/sentinel`: core application code.
-- `backend/tests`: tests for domain logic, synthetic data, and future LLM tooling.
-- `frontend/src`: feature-oriented React UI code.
+- `backend/src/sentinel/config.py` holds typed environment settings.
+- `backend/src/sentinel/domain.py` defines the core data models.
+- `backend/src/sentinel/data/synthetic.py` generates synthetic, time-ordered data.
+- `backend/src/sentinel/api.py` exposes a basic demo API.
+- `frontend/src/App.tsx` renders the analyst-facing experience in offline mode.
 
-The architecture is intentionally lightweight in this initial setup but follows the eventual project direction: domain-first logic, injectable infrastructure, and reproducible evaluation artifacts in `results/`.
-
-## Dependency direction
-
-The domain layer should not import the API, database, or frontend concerns. Future modules should depend inward, never outward.
-
+The design ensures future agents, evaluation scripts, and richer UI features can be added without coupling each layer to the others.

@@ -15,8 +15,11 @@ class Settings(BaseSettings):
     api_host: str = Field(default="0.0.0.0", validation_alias="SENTINEL_API_HOST")
     api_port: int = Field(default=8000, validation_alias="SENTINEL_API_PORT")
 
-    model_config = SettingsConfigDict(env_file=".env", env_prefix="SENTINEL_", case_sensitive=False)
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_prefix="SENTINEL_",
+        case_sensitive=False,
+    )
 
 
 settings = Settings()
-
