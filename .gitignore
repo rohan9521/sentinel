@@ -1,0 +1,22 @@
+# .gitignore
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+.env
+.venv/
+coverage.xml
+htmlcov/
+.DS_Store
+node_modules/
+frontend/dist/
+frontend/coverage/
+backend/.venv/
+backend/.pytest_cache/
+backend/.mypy_cache/
+backend/.ruff_cache/
+results/*.json
+results/*.csv
+!results/.gitkeep
+

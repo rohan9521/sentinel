@@ -1,0 +1,48 @@
+[project]
+name = "sentinel-backend"
+version = "0.1.0"
+description = "Sentinel backend foundation"
+readme = "../README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.115.0",
+  "uvicorn>=0.30.0",
+  "pydantic>=2.8.2",
+  "pydantic-settings>=2.7.1",
+  "langchain>=0.3.19",
+  "langchain-anthropic>=0.3.0",
+  "langgraph>=0.2.0",
+  "numpy>=1.26.4",
+  "pandas>=2.2.3",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.3.3",
+  "pytest-cov>=5.0.0",
+  "ruff>=0.6.9",
+  "mypy>=1.11.2",
+  "types-pyyaml>=6.0.12.20240917",
+]
+
+[build-system]
+requires = ["hatchling>=1.25.0"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+src = ["src"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unused_configs = true
+files = ["src", "tests"]
+
