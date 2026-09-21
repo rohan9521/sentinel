@@ -1,13 +1,14 @@
 # Architecture
 
-This repository follows the layered pattern described in the issue: domain logic stays pure, data generation remains separate, the API is thin, and the front-end consumes the backend through typed interfaces.
+This repository follows a layered structure designed to keep domain logic, synthetic data, service logic, and the HTTP layer separate.
 
-## Layering intent
+## Layers
 
-- `backend/src/sentinel/config.py` holds typed environment settings.
-- `backend/src/sentinel/domain.py` defines the core data models.
-- `backend/src/sentinel/data/synthetic.py` generates synthetic, time-ordered data.
-- `backend/src/sentinel/api.py` exposes a basic demo API.
-- `frontend/src/App.tsx` renders the analyst-facing experience in offline mode.
+- `backend/src/sentinel/config.py` provides typed environment configuration.
+- `backend/src/sentinel/domain.py` defines the domain objects used by the app.
+- `backend/src/sentinel/data/synthetic.py` creates reproducible synthetic data with time-based splitting.
+- `backend/src/sentinel/service.py` holds the business logic used by the API.
+- `backend/src/sentinel/api.py` exposes the HTTP endpoints consumed by the frontend.
+- `frontend/src/hooks/useCaseQueue.ts` provides a typed client-side fetch contract for the queue.
 
-The design ensures future agents, evaluation scripts, and richer UI features can be added without coupling each layer to the others.
+This keeps the application ready for later expansion into the model comparisons, agent tool layer, and evaluation pipeline described in the issue.
