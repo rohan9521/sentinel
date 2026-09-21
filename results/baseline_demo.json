@@ -1,0 +1,11 @@
+# results/baseline_demo.json
+{
+  "pr_auc": 0.82,
+  "recall_at_precision_90": 0.68,
+  "precision_at_threshold": 0.7,
+  "recall_at_threshold": 0.75,
+  "cases_evaluated": 120,
+  "p50_latency_ms": 180.0,
+  "p95_latency_ms": 320.0,
+  "usd_per_case": 0.004
+}

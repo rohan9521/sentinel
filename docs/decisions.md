@@ -11,3 +11,7 @@ The repository includes a lightweight FastAPI app up front because the front-end
 ## ADR-003: Offline demo readiness
 
 The default provider is intentionally set to `fake` so the app can be used without a real API key while still providing a realistic contract for later integrations.
+
+## ADR-004: Deterministic baseline evaluation
+
+We added a seeded surrogate GBM baseline and a reproducible evaluation runner. Results are written to `results/baseline_demo.json` so all reported metrics are traceable to generated artifacts instead of hand-written numbers.

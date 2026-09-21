@@ -2,7 +2,7 @@
 PYTHON ?= python3
 UV ?= uv
 
-.PHONY: setup test check api web dev data train eval report
+.PHONY: setup test check api web dev data train eval report backend-test frontend-test backend-check frontend-check
 
 setup:
 	cd backend && $(UV) sync
@@ -33,14 +33,14 @@ web:
 dev: api web
 
 data:
-	@echo "Synthetic data generation is wired via the backend CLI in phase 1."
+	cd backend && $(UV) run python -m sentinel.cli generate-data
 
 train:
-	@echo "Model training target pending core training pipeline."
+	@echo "Training target pending phase 2 model pipeline."
 
 eval:
-	@echo "Evaluation target pending the benchmark harness."
+	cd backend && $(UV) run python -m sentinel.cli eval
 
 report:
-	@echo "Report target pending metrics pipeline."
+	cd backend && $(UV) run python -m sentinel.cli report
 
