@@ -5,11 +5,11 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class MetricSummary:
-    pr_auc: float
-    recall_at_precision_90: float
-    p50_latency_ms: float
-    p95_latency_ms: float
-    usd_per_case: float
+    pr_auc: float | None
+    recall_at_precision_90: float | None
+    p50_latency_ms: float | None
+    p95_latency_ms: float | None
+    usd_per_case: float | None
 
 
 def summarize_metrics(values: list[float]) -> dict[str, float]:
@@ -25,9 +25,9 @@ def summarize_metrics(values: list[float]) -> dict[str, float]:
 
 def build_demo_metric_summary() -> MetricSummary:
     return MetricSummary(
-        pr_auc=0.88,
-        recall_at_precision_90=0.76,
-        p50_latency_ms=180.0,
-        p95_latency_ms=320.0,
-        usd_per_case=0.004,
+        pr_auc=None,
+        recall_at_precision_90=None,
+        p50_latency_ms=None,
+        p95_latency_ms=None,
+        usd_per_case=None,
     )

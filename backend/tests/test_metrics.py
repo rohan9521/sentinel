@@ -20,6 +20,8 @@ def test_fake_llm_produces_offline_response() -> None:
 def test_metric_summary_is_stable() -> None:
     summary = build_demo_metric_summary()
 
-    assert summary.pr_auc > 0.8
-    assert summary.recall_at_precision_90 > 0.5
-    assert summary.p95_latency_ms > summary.p50_latency_ms
+    assert summary.pr_auc is None
+    assert summary.recall_at_precision_90 is None
+    assert summary.p50_latency_ms is None
+    assert summary.p95_latency_ms is None
+    assert summary.usd_per_case is None

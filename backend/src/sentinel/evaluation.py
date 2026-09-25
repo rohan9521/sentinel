@@ -1,11 +1,15 @@
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
-from pathlib import Path
 import json
+from dataclasses import asdict, dataclass
+from math import isfinite
+from pathlib import Path
 
 from sentinel.baseline import SimpleGBMBaseline
 from sentinel.data.synthetic import SyntheticCaseGenerator
+
+REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
+EVALUATION_RESULTS_PATH = REPOSITORY_ROOT / "results" / "baseline_demo.json"
 
 
 @dataclass(frozen=True)
@@ -15,9 +19,12 @@ class EvaluationResult:
     precision_at_threshold: float
     recall_at_threshold: float
     cases_evaluated: int
-    p50_latency_ms: float
-    p95_latency_ms: float
-    usd_per_case: float
+    seed: int
+    evaluation_type: str
+    model_quality_claim: bool
+    p50_latency_ms: float | None
+    p95_latency_ms: float | None
+    usd_per_case: float | None
 
 
 def _safe_divide(numerator: float, denominator: float) -> float:
@@ -26,8 +33,20 @@ def _safe_divide(numerator: float, denominator: float) -> float:
     return numerator / denominator
 
 
-def _compute_precision_recall(labels: list[int], scores: list[float]) -> tuple[list[float], list[float]]:
-    pairs = sorted(zip(scores, labels), key=lambda item: item[0], reverse=True)
+def _validate_inputs(labels: list[int], scores: list[float]) -> None:
+    if not labels or not scores or len(labels) != len(scores):
+        raise ValueError("labels and scores must be non-empty and aligned")
+    if any(label not in (0, 1) for label in labels):
+        raise ValueError("labels must contain only 0 and 1")
+    if any(not isfinite(score) or not 0.0 <= score <= 1.0 for score in scores):
+        raise ValueError("scores must be finite probabilities between 0 and 1")
+
+
+def _compute_precision_recall(
+    labels: list[int],
+    scores: list[float],
+) -> tuple[list[float], list[float]]:
+    pairs = sorted(zip(scores, labels, strict=True), key=lambda item: item[0], reverse=True)
     positives = sum(labels)
     tp = 0
     fp = 0
@@ -52,14 +71,13 @@ def _compute_precision_recall(labels: list[int], scores: list[float]) -> tuple[l
 
 
 def compute_pr_auc(labels: list[int], scores: list[float]) -> float:
-    if not labels or not scores or len(labels) != len(scores):
-        raise ValueError("labels and scores must be non-empty and aligned")
+    _validate_inputs(labels, scores)
 
     positives = sum(labels)
     if positives == 0:
         return 0.0
 
-    pairs = sorted(zip(scores, labels), key=lambda item: item[0], reverse=True)
+    pairs = sorted(zip(scores, labels, strict=True), key=lambda item: item[0], reverse=True)
     tp = 0
     fp = 0
     prev_recall = 0.0
@@ -80,9 +98,14 @@ def compute_pr_auc(labels: list[int], scores: list[float]) -> float:
     return round(area, 6)
 
 
-def compute_recall_at_precision(labels: list[int], scores: list[float], target_precision: float = 0.9) -> float:
-    if not labels or not scores or len(labels) != len(scores):
-        raise ValueError("labels and scores must be non-empty and aligned")
+def compute_recall_at_precision(
+    labels: list[int],
+    scores: list[float],
+    target_precision: float = 0.9,
+) -> float:
+    _validate_inputs(labels, scores)
+    if not 0.0 <= target_precision <= 1.0:
+        raise ValueError("target_precision must be between 0 and 1")
 
     thresholds = sorted(set(scores), reverse=True)
     best_recall = 0.0
@@ -91,7 +114,7 @@ def compute_recall_at_precision(labels: list[int], scores: list[float], target_p
         tp = 0
         fp = 0
         positives = sum(labels)
-        for score, label in zip(scores, labels):
+        for score, label in zip(scores, labels, strict=True):
             if score >= threshold:
                 if label == 1:
                     tp += 1
@@ -107,23 +130,28 @@ def compute_recall_at_precision(labels: list[int], scores: list[float], target_p
 
 
 def evaluate_baseline_dataset(case_count: int = 120, seed: int = 42) -> EvaluationResult:
+    if case_count <= 0:
+        raise ValueError("case_count must be positive")
+
     generator = SyntheticCaseGenerator(seed=seed)
     cases = generator.generate_cases(case_count)
+    labels = [1 if case.label == "fraud" else 0 for case in cases]
+    if len(set(labels)) != 2:
+        raise ValueError("evaluation dataset must contain both label classes")
+
     baseline = SimpleGBMBaseline(threshold=0.5)
 
-    labels: list[int] = []
     scores: list[float] = []
     for case in cases:
         prediction = baseline.score_case(case)
-        labels.append(1 if case.label == "fraud" else 0)
         scores.append(prediction.score)
 
     threshold_precision = _safe_divide(
-        sum(1 for score, label in zip(scores, labels) if score >= 0.5 and label == 1),
+        sum(1 for score, label in zip(scores, labels, strict=True) if score >= 0.5 and label == 1),
         sum(1 for score in scores if score >= 0.5),
     )
     threshold_recall = _safe_divide(
-        sum(1 for score, label in zip(scores, labels) if score >= 0.5 and label == 1),
+        sum(1 for score, label in zip(scores, labels, strict=True) if score >= 0.5 and label == 1),
         sum(labels),
     )
 
@@ -133,15 +161,18 @@ def evaluate_baseline_dataset(case_count: int = 120, seed: int = 42) -> Evaluati
         precision_at_threshold=round(threshold_precision, 6),
         recall_at_threshold=round(threshold_recall, 6),
         cases_evaluated=len(cases),
-        p50_latency_ms=180.0,
-        p95_latency_ms=320.0,
-        usd_per_case=0.004,
+        seed=seed,
+        evaluation_type="synthetic_demo",
+        model_quality_claim=False,
+        p50_latency_ms=None,
+        p95_latency_ms=None,
+        usd_per_case=None,
     )
 
 
-def write_evaluation_results(path: str = "results/baseline_demo.json") -> EvaluationResult:
+def write_evaluation_results(path: str | Path | None = None) -> EvaluationResult:
     result = evaluate_baseline_dataset()
-    output = Path(path)
+    output = Path(path) if path is not None else EVALUATION_RESULTS_PATH
     output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(json.dumps(asdict(result), indent=2), encoding="utf-8")
+    output.write_text(f"{json.dumps(asdict(result), indent=2)}\n", encoding="utf-8")
     return result

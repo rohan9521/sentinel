@@ -57,7 +57,11 @@ class AccountHistoryTool:
                 "velocity": round(sum(amounts) / max(1, len(amounts)), 2),
                 "avg_amount": round(avg_amount, 2),
                 "new_payees": len({case.transaction.merchant for case in related}),
-                "geography_change": "high" if any("merchant" in case.transaction.merchant for case in related) else "low",
+                "geography_change": (
+                    "high"
+                    if any("merchant" in case.transaction.merchant for case in related)
+                    else "low"
+                ),
             },
         }
 

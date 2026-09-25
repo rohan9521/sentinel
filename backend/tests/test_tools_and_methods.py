@@ -1,14 +1,13 @@
 from __future__ import annotations
 
 from sentinel.data.synthetic import SyntheticCaseGenerator
-from sentinel.methods import GBMMethod, LLMOnlyMethod, FixedPipelineMethod, ToolCallingAgentMethod
+from sentinel.methods import FixedPipelineMethod, GBMMethod, LLMOnlyMethod, ToolCallingAgentMethod
 
 
 def test_agent_tools_score_and_retrieve() -> None:
     generator = SyntheticCaseGenerator(seed=9)
     case = generator.generate_cases(1)[0]
 
-    score = generator
     assert case.case_id
     assert case.account_id
     assert case.transaction.memo

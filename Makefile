@@ -2,11 +2,11 @@
 PYTHON ?= python3
 UV ?= uv
 
-.PHONY: setup test check api web dev data train eval report backend-test frontend-test backend-check frontend-check
+.PHONY: setup test check api web dev data train eval report docker-up backend-test frontend-test backend-check frontend-check
 
 setup:
-	cd backend && $(UV) sync
-	cd frontend && npm install
+	cd backend && $(UV) sync --locked --all-extras
+	cd frontend && npm ci
 
 backend-test:
 	cd backend && $(UV) run pytest
@@ -30,13 +30,16 @@ api:
 web:
 	cd frontend && npm run dev -- --host 0.0.0.0 --port 5173
 
-dev: api web
+dev:
+	(cd backend && $(UV) run uvicorn sentinel.api:app --host 0.0.0.0 --port 8000) & \
+	(cd frontend && npm run dev -- --host 0.0.0.0 --port 5173) & \
+	wait
 
 data:
 	cd backend && $(UV) run python -m sentinel.cli generate-data
 
 train:
-	@echo "Training target pending phase 2 model pipeline."
+	cd backend && $(UV) run python -m sentinel.cli train
 
 eval:
 	cd backend && $(UV) run python -m sentinel.cli eval
@@ -44,3 +47,5 @@ eval:
 report:
 	cd backend && $(UV) run python -m sentinel.cli report
 
+docker-up:
+	docker compose up --build

@@ -1,12 +1,18 @@
 from __future__ import annotations
 
 from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 
 from sentinel.config import settings
+from sentinel.llm import LLMAnalysisRequest, LLMAnalysisResponse
 from sentinel.service import SentinelService
 
 app = FastAPI(title="Sentinel API", version="0.1.0")
 service = SentinelService()
+
+
+class ErrorResponse(BaseModel):
+    detail: str
 
 
 @app.get("/health")
@@ -37,10 +43,16 @@ def get_results() -> dict[str, object]:
     return service.get_results()
 
 
-@app.post("/compare")
-def compare_case(payload: dict[str, str]) -> dict[str, object]:
-    case_id = payload.get("case_id")
-    memo = payload.get("memo", "")
-    if not case_id:
-        raise HTTPException(status_code=400, detail="case_id is required")
-    return service.compare_case(case_id, memo)
+@app.post(
+    "/compare",
+    response_model=LLMAnalysisResponse,
+    responses={502: {"model": ErrorResponse}},
+)
+def compare_case(payload: LLMAnalysisRequest) -> LLMAnalysisResponse:
+    try:
+        result = service.analyze_case(payload)
+    except RuntimeError as error:
+        raise HTTPException(status_code=502, detail=str(error)) from error
+    if result is None:
+        raise HTTPException(status_code=404, detail="case not found")
+    return result

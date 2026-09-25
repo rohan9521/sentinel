@@ -13,12 +13,17 @@ class SyntheticCaseGenerator:
     drift_schedule: list[tuple[int, float]] | None = None
 
     def __post_init__(self) -> None:
-        if self.drift_schedule is None:
-            self.drift_schedule = [(0, 0.0), (50, 0.15), (100, 0.3)]
+        drift_schedule = self.drift_schedule
+        if drift_schedule is None:
+            drift_schedule = [(0, 0.0), (50, 0.15), (100, 0.3)]
+        self.drift_schedule = drift_schedule
 
     def _drift_factor(self, index: int) -> float:
         current = 0.0
-        for threshold, factor in self.drift_schedule:
+        drift_schedule = self.drift_schedule
+        if drift_schedule is None:
+            return current
+        for threshold, factor in drift_schedule:
             if index >= threshold:
                 current = factor
         return current
@@ -38,7 +43,11 @@ class SyntheticCaseGenerator:
                 timestamp=start + timedelta(days=index, hours=(index % 12)),
                 amount=amount,
                 currency="USD",
-                memo="wire transfer for recurring subscription" if is_fraud else "coffee purchase from retail partner",
+                memo=(
+                    "wire transfer for recurring subscription"
+                    if index % 3 == 0
+                    else "coffee purchase from retail partner"
+                ),
                 merchant=merchant,
                 channel="online" if index % 2 == 0 else "branch",
             )

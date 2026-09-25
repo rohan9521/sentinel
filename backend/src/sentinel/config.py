@@ -10,7 +10,15 @@ class Settings(BaseSettings):
     app_name: str = "sentinel"
     llm_provider: str = Field(default="fake", validation_alias="SENTINEL_LLM_PROVIDER")
     model_name: str = Field(default="fake-model", validation_alias="SENTINEL_MODEL_NAME")
+    ollama_base_url: str = Field(
+        default="http://127.0.0.1:11434",
+        validation_alias="SENTINEL_OLLAMA_BASE_URL",
+    )
     max_usd: float = Field(default=0.25, validation_alias="SENTINEL_MAX_USD")
+    llm_timeout_seconds: float = Field(
+        default=30.0,
+        validation_alias="SENTINEL_LLM_TIMEOUT_SECONDS",
+    )
     seed: int = Field(default=42, validation_alias="SENTINEL_SEED")
     api_host: str = Field(default="0.0.0.0", validation_alias="SENTINEL_API_HOST")
     api_port: int = Field(default=8000, validation_alias="SENTINEL_API_PORT")

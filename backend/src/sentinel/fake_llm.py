@@ -14,12 +14,7 @@ class FakeLLM:
     def invoke(self, prompt: str, **kwargs: Any) -> str:
         if not prompt:
             raise ValueError("prompt must not be empty")
-        return (
-            "fake: "
-            f"model={self.model_name} "
-            f"tokens={len(prompt.split())} "
-            f"status=offline"
-        )
+        return f"fake: model={self.model_name} tokens={len(prompt.split())} status=offline"
 
     def generate_verdict(self, *, case_id: str, prompt: str) -> dict[str, Any]:
         verdict = "escalate" if "fraud" in prompt.lower() else "request_more_info"
